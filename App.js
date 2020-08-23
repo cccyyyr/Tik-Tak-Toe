@@ -1,129 +1,59 @@
-import * as React from "react";
-import { View, TouchableWithoutFeedback, Text } from "react-native";
-import Modal from "react-native-modal";
-import styles from "./styles.js";
-import Circle from "./components/circle";
-import Cross from "./components/cross";
-// import { registerRootComponent } from "expo";
-import { Button, Overlay } from "react-native-elements";
+import "react-native-gesture-handler";
+import React, { useEffect, useState } from "react";
+import { firebase } from "./src/firebase/config";
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+import { LoginScreen, HomeScreen, RegistrationScreen } from "./src/screens";
+import { decode, encode } from "base-64";
+if (!global.btoa) {
+  global.btoa = encode;
+}
+if (!global.atob) {
+  global.atob = decode;
+}
+
+const Stack = createStackNavigator();
 
 export default function App() {
-  const [inGame, setInGame] = React.useState(true);
-  const [oturn, setOTurn] = React.useState(false);
-  const [oInputs, setOInputs] = React.useState([]);
-  const [xInputs, setXInputs] = React.useState([]);
-  const [xHasWon, setXHasWon] = React.useState(false);
-  const [oHasWon, setOHasWon] = React.useState(false);
-  const x = 1;
-  const o = 0;
-
-  function clickHandler(e) {
-    const { locationX, locationY } = e.nativeEvent;
-    const area = AREAS.find(
-      (d) =>
-        locationX >= d.startX &&
-        locationX <= d.endX &&
-        locationY >= d.startY &&
-        locationY <= d.endY
-    );
-    if (inGame && area != null && areaNotOccupied(area.id)) {
-      if (oturn) {
-        const temp = oInputs.concat(area.id);
-        setOInputs(temp);
-        setOTurn(false);
-        if (hasWon(temp)) {
-          setInGame(false);
-          setOHasWon(true);
-          console.log("change is made");
-        }
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  useEffect(() => {
+    const usersRef = firebase.firestore().collection("users");
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        usersRef
+          .doc(user.uid)
+          .get()
+          .then((document) => {
+            const userData = document.data();
+            setLoading(false);
+            setUser(userData);
+          })
+          .catch((error) => {
+            setLoading(false);
+          });
       } else {
-        const temp = xInputs.concat(area.id);
-        setXInputs(temp);
-        setOTurn(true);
-        if (hasWon(temp)) {
-          setInGame(false);
-          setXHasWon(true);
-          console.log("change is made");
-        }
+        setLoading(false);
       }
-    }
-  }
-  function areaNotOccupied(area) {
-    return oInputs.indexOf(area) == -1 && xInputs.indexOf(area) == -1;
-  }
-  const CENTER_POINTS = [
-    { x: 10, y: 10 },
-    { x: 113, y: 10 },
-    { x: 213, y: 10 },
-    { x: 10, y: 113 },
-    { x: 113, y: 113 },
-    { x: 213, y: 113 },
-    { x: 10, y: 213 },
-    { x: 113, y: 213 },
-    { x: 213, y: 213 },
-  ];
+    });
+  }, []);
 
-  const AREAS = [
-    { startX: 3, startY: 3, endX: 103, endY: 103, id: 0 },
-    { startX: 106, startY: 3, endX: 206, endY: 103, id: 1 },
-    { startX: 209, startY: 3, endX: 309, endY: 103, id: 2 },
-    { startX: 3, startY: 106, endX: 103, endY: 206, id: 3 },
-    { startX: 106, startY: 106, endX: 206, endY: 206, id: 4 },
-    { startX: 209, startY: 106, endX: 309, endY: 206, id: 5 },
-    { startX: 3, startY: 209, endX: 103, endY: 309, id: 6 },
-    { startX: 106, startY: 209, endX: 206, endY: 309, id: 7 },
-    { startX: 209, startY: 209, endX: 309, endY: 309, id: 8 },
-  ];
-
-  const CONDITIONS = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6],
-  ];
-  function hasWon(inputs) {
-    return CONDITIONS.some((a) =>
-      a.every((item) => inputs.indexOf(item) !== -1)
-    );
+  if (loading) {
+    return <></>;
   }
 
   return (
-    <View style={styles.container}>
-      <TouchableWithoutFeedback onPress={(e) => clickHandler(e)}>
-        {/* <button title="new game" onPress={newGame()} /> */}
-        <View style={styles.board}>
-          <View style={styles.linetop} />
-          <View style={styles.linebot} />
-          <View style={styles.lineright} />
-          <View style={styles.lineleft} />
-          {oInputs.map((d) => (
-            <Circle
-              key={d}
-              xTranslate={CENTER_POINTS[d].x}
-              yTranslate={CENTER_POINTS[d].y}
-              color="deepskyblue"
-            />
-          ))}
-          {xInputs.map((d) => (
-            <Cross
-              key={d}
-              xTranslate={CENTER_POINTS[d].x}
-              yTranslate={CENTER_POINTS[d].y}
-              color="deepskyblue"
-            />
-          ))}
-        </View>
-      </TouchableWithoutFeedback>
-      <Modal isVisible={oHasWon}>
-        <Text>O has won!</Text>
-      </Modal>
-      <Modal isVisible={xHasWon}>
-        <Text>X has won!</Text>
-      </Modal>
-    </View>
+    <NavigationContainer>
+      <Stack.Navigator>
+        {user ? (
+          <Stack.Screen name="Home" component={HomeScreen} />
+        ) : (
+          <>
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="Registration" component={RegistrationScreen} />
+          </>
+        )}
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
