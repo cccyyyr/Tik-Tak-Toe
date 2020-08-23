@@ -23,12 +23,13 @@ export default function LoginScreen({ navigation }) {
           .doc(uid)
           .get()
           .then((firestoreDocument) => {
+            console.log(uid);
             if (!firestoreDocument.exists) {
               alert("User does not exist anymore.");
               return;
             }
             const user = firestoreDocument.data();
-            navigation.navigate("Home", { user: user });
+            navigation.navigate("Home", { user: user, turn: turn });
           })
           .catch((error) => {
             alert(error);

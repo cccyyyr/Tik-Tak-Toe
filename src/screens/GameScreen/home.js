@@ -7,7 +7,7 @@ import Cross from "../../components/cross";
 // import { registerRootComponent } from "expo";
 import { Button, Overlay } from "react-native-elements";
 
-export default function Home() {
+export default function Home(props, route) {
   const [inGame, setInGame] = React.useState(true);
   const [oturn, setOTurn] = React.useState(false);
   const [oInputs, setOInputs] = React.useState([]);
@@ -16,7 +16,9 @@ export default function Home() {
   const [oHasWon, setOHasWon] = React.useState(false);
   const x = 1;
   const o = 0;
-
+  const users = props.extraData.id;
+  const turn = route.params;
+  console.log(route);
   function clickHandler(e) {
     const { locationX, locationY } = e.nativeEvent;
     const area = AREAS.find(
@@ -91,6 +93,7 @@ export default function Home() {
 
   return (
     <View style={styles.container}>
+      <Text>{users}</Text>
       <TouchableWithoutFeedback onPress={(e) => clickHandler(e)}>
         {/* <button title="new game" onPress={newGame()} /> */}
         <View style={styles.board}>

@@ -14,7 +14,7 @@ const firebaseConfig = {
 };
 
 if (!firebase.apps.length) {
-  firebase.initializeApp({});
+  firebase.initializeApp(firebaseConfig);
 }
 
 export { firebase };
