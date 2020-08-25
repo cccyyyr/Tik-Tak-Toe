@@ -9,6 +9,7 @@ import {
   RegistrationScreen,
   RoomScreen,
 } from "./src/screens";
+import { startClock } from "react-native-reanimated";
 
 const Stack = createStackNavigator();
 

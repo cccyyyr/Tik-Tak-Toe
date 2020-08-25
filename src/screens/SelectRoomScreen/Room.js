@@ -11,31 +11,37 @@ import {
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 export default function Room(props) {
-  const [room, setRoom] = useState();
+  const [room, setRoom] = useState("0000");
   const user = props.extraData.id;
   const navigation = props.navigation;
-  const startGame = () => {
+  function startGame() {
     const roomRef = firebase.firestore().collection("rooms");
     roomRef
       .doc(room)
       .get()
       .then((doc) => {
+        var turn;
         if (doc.exists) {
-          console.log("yay");
+          turn = 0;
           roomRef.doc(room).update({ o: user });
         } else {
-          const res = roomRef.doc(room).set({
+          turn = 1;
+          roomRef.doc(room).set({
             x: user,
             room: room,
             o: null,
           });
         }
+        return turn;
+      })
+      .then((turn) => {
+        console.log(turn);
+        navigation.navigate("Home", { room: room, user: user, turn: turn });
       })
       .catch(function (error) {
         console.log("Error getting document:", error);
       });
-    navigation.navigate("Home", { room: room, user: user });
-  };
+  }
   return (
     <View>
       <TextInput
