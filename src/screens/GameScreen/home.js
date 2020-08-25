@@ -1,24 +1,60 @@
 import * as React from "react";
+import { useEffect, useState } from "react";
 import { View, TouchableWithoutFeedback, Text } from "react-native";
 import Modal from "react-native-modal";
 import styles from "./styles.js";
 import Circle from "../../components/circle";
 import Cross from "../../components/cross";
+import { firebase } from "../../firebase/config";
 // import { registerRootComponent } from "expo";
 import { Button, Overlay } from "react-native-elements";
+import { set } from "react-native-reanimated";
 
-export default function Home(props, route) {
-  const [inGame, setInGame] = React.useState(true);
-  const [oturn, setOTurn] = React.useState(false);
-  const [oInputs, setOInputs] = React.useState([]);
-  const [xInputs, setXInputs] = React.useState([]);
-  const [xHasWon, setXHasWon] = React.useState(false);
-  const [oHasWon, setOHasWon] = React.useState(false);
-  const x = 1;
-  const o = 0;
-  const users = props.extraData.id;
-  const turn = route.params;
-  console.log(route);
+export default function Home({ navigation, route }) {
+  const [inGame, setInGame] = useState(true);
+  const [oTurn, setOTurn] = useState(false);
+  const [oInputs, setOInputs] = useState([]);
+  const [xInputs, setXInputs] = useState([]);
+  const [xHasWon, setXHasWon] = useState(false);
+  const [oHasWon, setOHasWon] = useState(false);
+  const user = route.params.user;
+  const room = route.params.room;
+  const turn = route.params.turn;
+  console.log(user + " " + turn);
+  useEffect(() => {
+    const roomRef = firebase.firestore().collection("rooms");
+    roomRef.doc(room).onSnapshot((documentSnapShot) => {
+      const oturn = documentSnapShot.get("oturn");
+      if (oturn != null) {
+        setOTurn(oturn);
+        console.log(oTurn);
+      }
+      const o = documentSnapShot.get("oinputs");
+      if (o != null) {
+        setOInputs(o);
+      }
+      const x = documentSnapShot.get("xinputs");
+      if (x != null) {
+        setXInputs(x);
+      }
+      const ingame = documentSnapShot.get("ingame");
+      if (ingame != null) {
+        setInGame(ingame);
+      }
+      const xw = documentSnapShot.get("xhaswon");
+      if (xw != null) {
+        setXHasWon(xw);
+      }
+      const ow = documentSnapShot.get("ohaswon");
+      if (ow != null) {
+        setOHasWon(ow);
+      }
+    });
+    if (!inGame) {
+      roomRef.doc(room).delete();
+    }
+  }, []);
+
   function clickHandler(e) {
     const { locationX, locationY } = e.nativeEvent;
     const area = AREAS.find(
@@ -29,26 +65,43 @@ export default function Home(props, route) {
         locationY <= d.endY
     );
     if (inGame && area != null && areaNotOccupied(area.id)) {
-      if (oturn) {
-        const temp = oInputs.concat(area.id);
-        setOInputs(temp);
-        setOTurn(false);
-        if (hasWon(temp)) {
-          setInGame(false);
-          setOHasWon(true);
-        }
-      } else {
-        const temp = xInputs.concat(area.id);
-        setXInputs(temp);
-        setOTurn(true);
-        if (hasWon(temp)) {
-          setInGame(false);
-          setXHasWon(true);
-        }
-      }
+      const roomRef = firebase.firestore().collection("rooms");
+      roomRef
+        .doc(room)
+        .get()
+        .then((documentSnapShot) => {
+          if (oTurn && turn == 0) {
+            roomRef.doc(room).update({ oturn: false });
+            console.log("oinputs is" + oInputs);
+            const temp = oInputs.concat(area.id);
+            if (hasWon(temp)) {
+              roomRef.doc(room).update({ ohaswon: true });
+              roomRef.doc(room).update({ ingame: false });
+              setOHasWon(true);
+              setInGame(false);
+            }
+            roomRef.doc(room).update({ oinputs: oInputs.concat(area.id) });
+          } else if (!oTurn && turn == 1) {
+            roomRef.doc(room).update({ oturn: true });
+            console.log("should have changed oturn");
+            console.log("xinputs is" + xInputs);
+            const temp = xInputs.concat(area.id);
+            roomRef.doc(room).update({ xinputs: temp });
+            if (hasWon(temp)) {
+              roomRef.doc(room).update({ xhaswon: true });
+              roomRef.doc(room).update({ ingame: false });
+              setInGame(false);
+              setXHasWon(true);
+            }
+          } else {
+            alert("Not ur turn!");
+          }
+        });
     }
   }
   function areaNotOccupied(area) {
+    console.log("xinputs is" + xInputs);
+    console.log("oinputs is" + oInputs);
     return oInputs.indexOf(area) == -1 && xInputs.indexOf(area) == -1;
   }
   const CENTER_POINTS = [
@@ -93,7 +146,8 @@ export default function Home(props, route) {
 
   return (
     <View style={styles.container}>
-      <Text>{users}</Text>
+      <Text>Hello, {user}</Text>
+      <Text>You are in room: {room}</Text>
       <TouchableWithoutFeedback onPress={(e) => clickHandler(e)}>
         {/* <button title="new game" onPress={newGame()} /> */}
         <View style={styles.board}>
