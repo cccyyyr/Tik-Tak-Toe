@@ -17,37 +17,31 @@ export default function Home({ navigation, route }) {
   const [xInputs, setXInputs] = useState([]);
   const [xHasWon, setXHasWon] = useState(false);
   const [oHasWon, setOHasWon] = useState(false);
+  const [oppo, setOppo] = useState("");
   const user = route.params.user;
   const room = route.params.room;
   const turn = route.params.turn;
-  console.log(user + " " + turn);
+  const roomRef = firebase.firestore().collection("rooms");
   useEffect(() => {
-    const roomRef = firebase.firestore().collection("rooms");
     roomRef.doc(room).onSnapshot((documentSnapShot) => {
       const oturn = documentSnapShot.get("oturn");
-      if (oturn != null) {
-        setOTurn(oturn);
-        console.log(oTurn);
-      }
+      setOTurn(oturn);
       const o = documentSnapShot.get("oinputs");
-      if (o != null) {
-        setOInputs(o);
-      }
+      setOInputs(o);
       const x = documentSnapShot.get("xinputs");
-      if (x != null) {
-        setXInputs(x);
-      }
+      setXInputs(x);
       const ingame = documentSnapShot.get("ingame");
-      if (ingame != null) {
-        setInGame(ingame);
-      }
+      setInGame(ingame);
       const xw = documentSnapShot.get("xhaswon");
-      if (xw != null) {
-        setXHasWon(xw);
-      }
+      setXHasWon(xw);
       const ow = documentSnapShot.get("ohaswon");
-      if (ow != null) {
-        setOHasWon(ow);
+      setOHasWon(ow);
+      if (turn == 0) {
+        const oppo = documentSnapShot.get("x");
+        setOppo(oppo);
+      } else {
+        const oppo = documentSnapShot.get("o");
+        setOppo(oppo);
       }
     });
     if (!inGame) {
@@ -65,7 +59,6 @@ export default function Home({ navigation, route }) {
         locationY <= d.endY
     );
     if (inGame && area != null && areaNotOccupied(area.id)) {
-      const roomRef = firebase.firestore().collection("rooms");
       roomRef
         .doc(room)
         .get()
@@ -100,8 +93,6 @@ export default function Home({ navigation, route }) {
     }
   }
   function areaNotOccupied(area) {
-    console.log("xinputs is" + xInputs);
-    console.log("oinputs is" + oInputs);
     return oInputs.indexOf(area) == -1 && xInputs.indexOf(area) == -1;
   }
   const CENTER_POINTS = [
@@ -143,7 +134,29 @@ export default function Home({ navigation, route }) {
       a.every((item) => inputs.indexOf(item) !== -1)
     );
   }
-
+  function newGame() {
+    setInGame(true);
+    var o, x;
+    if (turn == 0) {
+      o = user;
+      x = oppo;
+    } else {
+      o = oppo;
+      x = user;
+    }
+    roomRef.doc(room).set({
+      room: room,
+      o: o,
+      x: x,
+      oturn: false,
+      oinputs: [],
+      xinputs: [],
+      ohaswon: false,
+      xhaswon: false,
+      ingame: true,
+    });
+    navigation.navigate("Home", { room: room, user: user, turn: turn });
+  }
   return (
     <View style={styles.container}>
       <Text>Hello, {user}</Text>
@@ -175,9 +188,11 @@ export default function Home({ navigation, route }) {
       </TouchableWithoutFeedback>
       <Modal isVisible={oHasWon}>
         <Text>O has won!</Text>
+        <Button title="New Game" onPress={newGame} />
       </Modal>
       <Modal isVisible={xHasWon}>
         <Text>X has won!</Text>
+        <Button title="New Game" onPress={newGame} />
       </Modal>
     </View>
   );

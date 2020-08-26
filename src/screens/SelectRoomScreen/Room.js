@@ -30,6 +30,12 @@ export default function Room(props) {
             x: user,
             room: room,
             o: null,
+            oturn: false,
+            oinputs: [],
+            xinputs: [],
+            ohaswon: false,
+            xhaswon: false,
+            ingame: true,
           });
         }
         return turn;
