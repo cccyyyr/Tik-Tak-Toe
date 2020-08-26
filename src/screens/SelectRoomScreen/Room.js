@@ -14,6 +14,27 @@ export default function Room(props) {
   const [room, setRoom] = useState("0000");
   const user = props.extraData.id;
   const navigation = props.navigation;
+  // useEffect(() => {
+  //   const usersRef = firebase.firestore().collection("users");
+  //   firebase.auth().onAuthStateChanged((user) => {
+  //     if (user) {
+  //       usersRef
+  //         .doc(user.uid)
+  //         .get()
+  //         .then((document) => {
+  //           const userData = document.data();
+  //           setLoading(false);
+  //           setUser(userData);
+  //         })
+  //         .catch((error) => {
+  //           setLoading(false);
+  //         });
+  //     } else {
+  //       setLoading(false);
+  //     }
+  //   });
+  // }, []);
+
   function startGame() {
     const roomRef = firebase.firestore().collection("rooms");
     roomRef
@@ -64,6 +85,15 @@ export default function Room(props) {
         blurOnSubmit={false}
       />
       <Button title="go" onPress={startGame} />
+      <Button
+        title="Sign Out"
+        onPress={() =>
+          firebase
+            .auth()
+            .signOut()
+            .then(function () {})
+        }
+      />
     </View>
   );
 }
