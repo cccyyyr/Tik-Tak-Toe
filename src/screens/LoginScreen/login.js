@@ -16,7 +16,6 @@ export default function LoginScreen({ navigation }) {
     firebase
       .auth()
       .signInWithEmailAndPassword(email, password)
-      .then(navigation.navigate("Room"))
       .catch((error) => {
         alert(error);
       });
