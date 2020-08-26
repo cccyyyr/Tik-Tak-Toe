@@ -11,31 +11,14 @@ import {
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 export default function Room(props) {
-  const [room, setRoom] = useState("0000");
+  const [room, setRoom] = useState("");
   const user = props.extraData.id;
   const navigation = props.navigation;
-  // useEffect(() => {
-  //   const usersRef = firebase.firestore().collection("users");
-  //   firebase.auth().onAuthStateChanged((user) => {
-  //     if (user) {
-  //       usersRef
-  //         .doc(user.uid)
-  //         .get()
-  //         .then((document) => {
-  //           const userData = document.data();
-  //           setLoading(false);
-  //           setUser(userData);
-  //         })
-  //         .catch((error) => {
-  //           setLoading(false);
-  //         });
-  //     } else {
-  //       setLoading(false);
-  //     }
-  //   });
-  // }, []);
-
   function startGame() {
+    if (room == "") {
+      navigation.navigate("Home", { room: "", user: user, turn: 1 });
+      return;
+    }
     const roomRef = firebase.firestore().collection("rooms");
     roomRef
       .doc(room)
@@ -74,7 +57,7 @@ export default function Room(props) {
       <TextInput
         onSubmitEditing={startGame}
         onChangeText={(text) => setRoom(text)}
-        placeholder="Type or create a room"
+        placeholder="Join or create a room"
         placeholderTextColor={"black"}
         underlineColorAndroid="black"
         selectionColor={"black"}

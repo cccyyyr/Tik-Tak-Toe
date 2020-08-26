@@ -23,6 +23,10 @@ export default function Home({ navigation, route }) {
   const turn = route.params.turn;
   const roomRef = firebase.firestore().collection("rooms");
   useEffect(() => {
+    console.log(xInputs);
+    if (room == "") {
+      return;
+    }
     roomRef.doc(room).onSnapshot((documentSnapShot) => {
       const oturn = documentSnapShot.get("oturn");
       setOTurn(oturn);
@@ -59,6 +63,10 @@ export default function Home({ navigation, route }) {
         locationY <= d.endY
     );
     if (inGame && area != null && areaNotOccupied(area.id)) {
+      if (room == "") {
+        moveAI(area.id);
+        return;
+      }
       roomRef
         .doc(room)
         .get()
@@ -76,8 +84,6 @@ export default function Home({ navigation, route }) {
             roomRef.doc(room).update({ oinputs: oInputs.concat(area.id) });
           } else if (!oTurn && turn == 1) {
             roomRef.doc(room).update({ oturn: true });
-            console.log("should have changed oturn");
-            console.log("xinputs is" + xInputs);
             const temp = xInputs.concat(area.id);
             roomRef.doc(room).update({ xinputs: temp });
             if (hasWon(temp)) {
@@ -94,6 +100,34 @@ export default function Home({ navigation, route }) {
   }
   function areaNotOccupied(area) {
     return oInputs.indexOf(area) == -1 && xInputs.indexOf(area) == -1;
+  }
+
+  function areaAv(area, a, b) {
+    console.log(a);
+    console.log(b);
+    return a.indexOf(area) == -1 && b.indexOf(area) == -1;
+  }
+  function moveAI(area) {
+    const temp1 = xInputs.concat(area);
+    setXInputs(temp1);
+    if (hasWon(temp1)) {
+      setInGame(false);
+      setXHasWon(true);
+      return;
+    }
+    while (true) {
+      const radom = Math.random() * 8.3;
+      const move = Math.round(radom);
+      if (areaAv(move, temp1, oInputs)) {
+        const temp = oInputs.concat(move);
+        setOInputs(temp);
+        if (hasWon(temp)) {
+          setInGame(false);
+          setOHasWon(true);
+        }
+        break;
+      }
+    }
   }
   const CENTER_POINTS = [
     { x: 10, y: 10 },
@@ -136,26 +170,31 @@ export default function Home({ navigation, route }) {
   }
   function newGame() {
     setInGame(true);
-    var o, x;
-    if (turn == 0) {
-      o = user;
-      x = oppo;
-    } else {
-      o = oppo;
-      x = user;
+    if (room != "") {
+      var o, x;
+      if (turn == 0) {
+        o = user;
+        x = oppo;
+      } else {
+        o = oppo;
+        x = user;
+      }
+      roomRef.doc(room).set({
+        room: room,
+        o: o,
+        x: x,
+        oturn: false,
+        oinputs: [],
+        xinputs: [],
+        ohaswon: false,
+        xhaswon: false,
+        ingame: true,
+      });
     }
-    roomRef.doc(room).set({
-      room: room,
-      o: o,
-      x: x,
-      oturn: false,
-      oinputs: [],
-      xinputs: [],
-      ohaswon: false,
-      xhaswon: false,
-      ingame: true,
-    });
+    console.log("hi");
+    navigation.navigate("Room");
     navigation.navigate("Home", { room: room, user: user, turn: turn });
+    console.log("h");
   }
   return (
     <View style={styles.container}>
