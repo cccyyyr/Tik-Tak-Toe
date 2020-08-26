@@ -9,7 +9,6 @@ import {
   RegistrationScreen,
   RoomScreen,
 } from "./src/screens";
-import { startClock } from "react-native-reanimated";
 
 const Stack = createStackNavigator();
 
@@ -32,6 +31,7 @@ export default function App() {
             setLoading(false);
           });
       } else {
+        setUser(null);
         setLoading(false);
       }
     });
