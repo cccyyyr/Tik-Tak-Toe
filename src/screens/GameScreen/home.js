@@ -22,8 +22,8 @@ export default function Home({ navigation, route }) {
   const room = route.params.room;
   const turn = route.params.turn;
   const roomRef = firebase.firestore().collection("rooms");
+
   useEffect(() => {
-    console.log(xInputs);
     if (room == "") {
       return;
     }
@@ -73,7 +73,6 @@ export default function Home({ navigation, route }) {
         .then((documentSnapShot) => {
           if (oTurn && turn == 0) {
             roomRef.doc(room).update({ oturn: false });
-            console.log("oinputs is" + oInputs);
             const temp = oInputs.concat(area.id);
             if (hasWon(temp)) {
               roomRef.doc(room).update({ ohaswon: true });
@@ -103,8 +102,6 @@ export default function Home({ navigation, route }) {
   }
 
   function areaAv(area, a, b) {
-    console.log(a);
-    console.log(b);
     return a.indexOf(area) == -1 && b.indexOf(area) == -1;
   }
   function moveAI(area) {
@@ -130,19 +127,19 @@ export default function Home({ navigation, route }) {
     }
   }
   const CENTER_POINTS = [
-    { x: 10, y: 10 },
-    { x: 113, y: 10 },
-    { x: 213, y: 10 },
-    { x: 10, y: 113 },
-    { x: 113, y: 113 },
-    { x: 213, y: 113 },
-    { x: 10, y: 213 },
-    { x: 113, y: 213 },
-    { x: 213, y: 213 },
+    { x: 30, y: 10 },
+    { x: 142, y: 10 },
+    { x: 247, y: 10 },
+    { x: 30, y: 110 },
+    { x: 142, y: 110 },
+    { x: 247, y: 110 },
+    { x: 30, y: 223 },
+    { x: 142, y: 223 },
+    { x: 247, y: 223 },
   ];
 
   const AREAS = [
-    { startX: 3, startY: 3, endX: 103, endY: 103, id: 0 },
+    { startX: 3, startY: 3, endX: 125, endY: 97, id: 0 },
     { startX: 106, startY: 3, endX: 206, endY: 103, id: 1 },
     { startX: 209, startY: 3, endX: 309, endY: 103, id: 2 },
     { startX: 3, startY: 106, endX: 103, endY: 206, id: 3 },
@@ -191,17 +188,23 @@ export default function Home({ navigation, route }) {
         ingame: true,
       });
     }
-    console.log("hi");
+
     navigation.navigate("Room");
     navigation.navigate("Home", { room: room, user: user, turn: turn });
-    console.log("h");
   }
   return (
     <View style={styles.container}>
-      <Text>Hello, {user}</Text>
-      <Text>You are in room: {room}</Text>
+      <Text style={styles.helloStyle}>Hello, {user}</Text>
+      <Text style={styles.roomStyle}>
+        You are in room: {room == "" ? "BotRoom" : room}
+      </Text>
+      <Text>{"                                 "}</Text>
+      <Text>{"                                 "}</Text>
+      <Text>{"                                 "}</Text>
+      <Text>{"                                 "}</Text>
+      <Text>{"                                 "}</Text>
+
       <TouchableWithoutFeedback onPress={(e) => clickHandler(e)}>
-        {/* <button title="new game" onPress={newGame()} /> */}
         <View style={styles.board}>
           <View style={styles.linetop} />
           <View style={styles.linebot} />
@@ -226,12 +229,20 @@ export default function Home({ navigation, route }) {
         </View>
       </TouchableWithoutFeedback>
       <Modal isVisible={oHasWon}>
-        <Text>O has won!</Text>
-        <Button title="New Game" onPress={newGame} />
+        <Text style={styles.textStyle}>O has won!</Text>
+        <Button
+          title="New Game"
+          onPress={newGame}
+          style={styles.newGameStyle}
+        />
       </Modal>
       <Modal isVisible={xHasWon}>
-        <Text>X has won!</Text>
-        <Button title="New Game" onPress={newGame} />
+        <Text style={styles.textStyle}>X has won!</Text>
+        <Button
+          title="New Game"
+          onPress={newGame}
+          style={styles.newGameStyle}
+        />
       </Modal>
     </View>
   );

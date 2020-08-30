@@ -5,10 +5,9 @@ import Constants from "expo-constants";
 export default StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    paddingTop: Constants.statusBarHeight,
+    transform: [{ translateY: 70 }],
     backgroundColor: "#ecf0f1",
-    padding: 8,
+    padding: 1,
   },
   board: {
     height: 312,
@@ -19,7 +18,7 @@ export default StyleSheet.create({
     height: 306,
     width: 3,
     position: "absolute",
-    transform: [{ translateX: 100 }],
+    transform: [{ translateX: 125 }],
   },
 
   lineright: {
@@ -27,7 +26,7 @@ export default StyleSheet.create({
     height: 306,
     width: 3,
     position: "absolute",
-    transform: [{ translateX: 200 }],
+    transform: [{ translateX: 237 }],
   },
 
   linetop: {
@@ -35,7 +34,7 @@ export default StyleSheet.create({
     height: 3,
     width: 306,
     position: "absolute",
-    transform: [{ translateY: 100 }],
+    transform: [{ translateY: 97 }, { translateX: 23 }],
   },
 
   linebot: {
@@ -43,6 +42,24 @@ export default StyleSheet.create({
     height: 3,
     width: 306,
     position: "absolute",
-    transform: [{ translateY: 200 }],
+    transform: [{ translateY: 204 }, { translateX: 23 }],
+  },
+  textStyle: {
+    color: "white",
+    fontSize: 40,
+    textAlign: "center",
+  },
+  newGameStyle: {
+    justifyContent: "center",
+  },
+  helloStyle: {
+    color: "navy",
+    fontSize: 40,
+    textAlign: "center",
+  },
+  roomStyle: {
+    color: "navy",
+    fontSize: 20,
+    textAlign: "center",
   },
 });
