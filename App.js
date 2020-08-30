@@ -13,7 +13,6 @@ import {
 const Stack = createStackNavigator();
 
 export default function App() {
-  const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
   useEffect(() => {
     const usersRef = firebase.firestore().collection("users");
@@ -24,22 +23,14 @@ export default function App() {
           .get()
           .then((document) => {
             const userData = document.data();
-            setLoading(false);
             setUser(userData);
           })
-          .catch((error) => {
-            setLoading(false);
-          });
+          .catch((error) => {});
       } else {
         setUser(null);
-        setLoading(false);
       }
     });
   }, []);
-
-  if (loading) {
-    return <></>;
-  }
 
   return (
     <NavigationContainer>

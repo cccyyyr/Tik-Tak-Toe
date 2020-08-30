@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { firebase } from "../../firebase/config";
-
+import styles from "./styles.js";
 import {
   Image,
   Text,
@@ -12,7 +12,7 @@ import {
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 export default function Room(props) {
   const [room, setRoom] = useState("");
-  const user = props.extraData.id;
+  const user = props.extraData.fullName;
   const navigation = props.navigation;
   function startGame() {
     if (room == "") {
@@ -53,7 +53,7 @@ export default function Room(props) {
       });
   }
   return (
-    <View>
+    <View style={styles.container}>
       <TextInput
         onSubmitEditing={startGame}
         onChangeText={(text) => setRoom(text)}
@@ -67,7 +67,7 @@ export default function Room(props) {
         autoCorrect={false}
         blurOnSubmit={false}
       />
-      <Button title="go" onPress={startGame} />
+      <Button title="Go" onPress={startGame} style={styles.buttonStyle} />
       <Button
         title="Sign Out"
         onPress={() =>
